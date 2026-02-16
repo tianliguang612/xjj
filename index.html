@@ -5,35 +5,170 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>随机小姐姐</title>
     <style>
-        /* --- 背景设置区域 --- */
         body {
-            background-image: url('https://free-img.400040.xyz/4/2026/02/08/69888de882e23.jpg'); 
-            background-size: cover;      
-            background-position: center; 
+            background-image: url('https://free-img.400040.xyz/4/2026/02/08/69888de882e23.jpg');
+            background-size: cover;
+            background-position: center;
             background-attachment: fixed;
-            background-color: rgba(0, 0, 0, 0.5); 
+            background-color: rgba(0, 0, 0, 0.5);
             margin: 0;
-            height: 100vh;              
+            height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: center;    
-            align-items: center;        
+            justify-content: center;
+            align-items: center;
             font-family: 'Microsoft YaHei', sans-serif;
-            overflow: hidden; 
+            overflow: hidden;
         }
 
-        /* 按钮样式 */
-        #startBtn {
-            background-color: #4CAF50; /* 绿色背景 */
+        /* --- 修改：视频容器 --- */
+        /* 关键：设置为相对定位，作为内部绝对定位元素的参考点 */
+        .video-container {
+            position: relative;
+            width: 90%;
+            max-width: 600px;
+            margin-top: 20px;
+            display: none; /* 初始隐藏 */
+        }
+
+        /* --- 修改：视频样式 --- */
+        /* 视频保持正常流布局，作为底层 */
+        .video-container video {
+            width: 100%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            background: #000;
+            display: block;
+        }
+
+        /* --- 修改：换一个按钮 --- */
+        /* 关键：绝对定位，覆盖在视频上 */
+        #changeBtn {
+            position: absolute;
+            /* 定位在右上角，距离边缘留点空隙 */
+            top: 10px;
+            right: 10px;
+            /* 确保在视频上层 */
+            z-index: 10;
+            
+            /* 样式美化 */
+            background-color: rgba(0, 0, 0, 0.6); /* 半透明背景 */
             border: none;
             color: white;
-            padding: 15px 32px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            margin: 10px;
+            padding: 10px 15px;
+            font-size: 14px;
             cursor: pointer;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            transition: all 0.2s ease;
+            font-weight: bold;
+        }
+
+        #changeBtn:hover {
+            background-color: rgba(0, 0, 0, 0.8);
+            transform: scale(1.05);
+        }
+
+        #changeBtn:active {
+            transform: scale(0.95);
+        }
+
+        /* 开始按钮保持原样 */
+        #startBtn {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 8px;
+            box-shadow: 0 4px #999;
+            transition-duration: 0.4s;
+            font-weight: bold;
+            margin: 5px;
+            z-index: 5;
+        }
+
+        #startBtn:hover {background-color: #45a049}
+        #startBtn:active {
+            background-color: #3e8e41;
+            box-shadow: 0 5px #666;
+            transform: translateY(4px);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 界面按钮 -->
+    <button id="startBtn">点击开始</button>
+
+    <!-- --- 修改：视频与按钮的包裹容器 --- -->
+    <!-- 这个 div 现在是定位的参考点 -->
+    <div class="video-container" id="videoContainer">
+        <video id="videoPlayer" muted></video>
+        <button id="changeBtn">换一个</button>
+    </div>
+
+    <script>
+        const startBtn = document.getElementById('startBtn');
+        const changeBtn = document.getElementById('changeBtn');
+        const videoContainer = document.getElementById('videoContainer');
+        const video = document.getElementById('videoPlayer');
+
+        // API 地址
+        const apiUrl = 'https://api.kxzjoker.cn/api/sjmnsp';
+
+        // 核心：获取并播放视频的函数
+        async function loadAndPlayVideo() {
+            try {
+                const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error('网络响应错误');
+                const data = await response.json();
+
+                if (data.code === 200 && data.video_url) {
+                    // 1. 重置视频
+                    video.pause();
+                    video.src = "";
+                    video.load();
+
+                    // 2. 加载新源
+                    video.src = data.video_url;
+
+                    // 3. 尝试播放
+                    await video.play();
+
+                    // 4. 播放成功后，移除静音
+                    video.muted = false;
+
+                } else {
+                    alert('视频链接获取失败，请稍后再试。');
+                }
+            } catch (error) {
+                console.error('请求出错:', error);
+                alert('网络请求失败，请检查网络或稍后再试。');
+            }
+        }
+
+        // 点击“开始”按钮
+        startBtn.addEventListener('click', function() {
+            startBtn.style.display = 'none';
+            videoContainer.style.display = 'block'; // 显示容器
+            loadAndPlayVideo();
+        });
+
+        // 点击“换一个”按钮
+        changeBtn.addEventListener('click', function() {
+            loadAndPlayVideo();
+        });
+
+        // 视频结束自动播放下一个
+        video.addEventListener('ended', function() {
+            loadAndPlayVideo();
+        });
+    </script>
+</body>
+</html>
             border-radius: 8px;
             box-shadow: 0 4px #999;
             transition-duration: 0.4s;
