@@ -5,35 +5,119 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>随机小姐姐</title>
     <style>
+        /* --- 背景设置区域 --- */
         body {
-            background-image: url('https://free-img.400040.xyz/4/2026/02/08/69888de882e23.jpg');
-            background-size: cover;
-            background-position: center;
+            background-image: url('https://free-img.400040.xyz/4/2026/02/08/69888de882e23.jpg'); 
+            background-size: cover;      
+            background-position: center; 
             background-attachment: fixed;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.5); 
             margin: 0;
-            height: 100vh;
+            height: 100vh;              
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            justify-content: center;    
+            align-items: center;        
             font-family: 'Microsoft YaHei', sans-serif;
-            overflow: hidden;
+            overflow: hidden; 
         }
 
-        /* --- 修改：视频容器 --- */
-        /* 关键：设置为相对定位，作为内部绝对定位元素的参考点 */
+        /* 按钮样式 */
+        #startBtn {
+            background-color: #4CAF50; /* 绿色背景 */
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 10px;
+            cursor: pointer;
+            border-radius: 8px;
+            box-shadow: 0 4px #999;
+            transition-duration: 0.4s;
+            font-weight: bold;
+        }
+
+        #startBtn:hover {background-color: #45a049}
+        #startBtn:active {
+            background-color: #3e8e41;
+            box-shadow: 0 5px #666;
+            transform: translateY(4px);
+        }
+
+        /* 视频容器样式 */
         .video-container {
             position: relative;
             width: 90%;
-            max-width: 600px;
             margin-top: 20px;
-            display: none; /* 初始隐藏 */
+            display: none; /* 初始隐藏视频 */
         }
 
-        /* --- 修改：视频样式 --- */
-        /* 视频保持正常流布局，作为底层 */
-        .video-container video {
+        video {
+            width: 100%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 开始播放按钮 -->
+    <button id="startBtn">点击开始播放</button>
+
+    <!-- 视频容器 -->
+    <div class="video-container">
+        <video id="videoPlayer" controls autoplay></video>
+    </div>
+
+    <script>
+        const btn = document.getElementById('startBtn');
+        const container = document.querySelector('.video-container');
+        const video = document.getElementById('videoPlayer');
+        
+        // API 地址
+        const apiUrl = 'https://api.kxzjoker.cn/api/sjmnsp'; // 尝试使用 HTTPS
+
+        // 定义获取视频的函数
+        async function fetchVideo() {
+            try {
+                const response = await fetch(apiUrl);
+                if (!response.ok) {
+                    throw new Error('网络响应错误');
+                }
+                const data = await response.json();
+                
+                if (data.code === 200 && data.video_url) {
+                    video.src = data.video_url;
+                    video.play(); // 尝试自动播放
+                } else {
+                    alert('视频链接获取失败，请稍后再试。');
+                }
+            } catch (error) {
+                console.error('请求出错:', error);
+                alert('网络请求失败，请检查网络或稍后再试。');
+            }
+        }
+
+        // 视频结束时的事件监听
+        video.addEventListener('ended', function() {
+            console.log('视频播放结束，正在加载下一个...');
+            fetchVideo(); // 视频结束后自动调用函数加载新视频
+        });
+
+        // 点击按钮开始播放
+        btn.addEventListener('click', function() {
+            btn.style.display = 'none'; // 点击后隐藏按钮
+            container.style.display = 'block'; // 显示视频区域
+            fetchVideo(); // 点击后获取并播放第一个视频
+        });
+    </script>
+
+</body>
+</html>
             width: 100%;
             height: auto;
             border-radius: 12px;
