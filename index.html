@@ -47,24 +47,28 @@
             text-align: center;
             margin-top: 20px;
             background: rgba(255, 255, 255, 0.1);
-            padding: 20px;
+            padding: 30px 20px;
             border-radius: 12px;
             backdrop-filter: blur(5px);
+            width: 80%;
+            max-width: 300px;
         }
         .source-selector h3 {
             color: white;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
         .source-btn {
             background-color: #FF69B4;
             border: none;
             color: white;
-            padding: 10px 20px;
+            padding: 12px 20px;
             font-size: 16px;
             cursor: pointer;
             border-radius: 8px;
-            margin: 0 10px;
+            margin: 0 0 15px 0;
             transition: background 0.2s;
+            width: 100%;
+            box-sizing: border-box;
         }
         .source-btn:hover {
             background-color: #FF1493;
@@ -127,6 +131,78 @@
             border-radius: 10px;
             display: none;
         }
+
+        /* 新增: 图片模式的样式 */
+        .image-mode {
+            display: none; /* 默认隐藏 */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 20px;
+        }
+        .image-mode h1 {
+            font-size: 28px;
+            margin-top: 40px;
+            margin-bottom: 30px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            color: white;
+        }
+        .btn-group {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .btn {
+            padding: 12px 30px;
+            font-size: 18px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.2s;
+            color: white;
+            font-weight: bold;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            opacity: 0.9;
+        }
+        .btn-white {
+            background: linear-gradient(to right, #fbc2eb, #a6c1ee);
+        }
+        .btn-black {
+            background: linear-gradient(to right, #12c2e9, #c471ed);
+        }
+        #image-container {
+            width: 90%;
+            max-width: 600px;
+            height: 400px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            margin-top: 10px;
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+        }
+        #image-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        #image-container .loading {
+            font-size: 16px;
+            color: #ccc;
+        }
     </style>
 </head>
 <body>
@@ -136,6 +212,8 @@
         <h3>请选择视频来源</h3>
         <button class="source-btn" id="source1Btn">播放 随机小姐姐1 的视频</button>
         <button class="source-btn" id="source2Btn">播放 随机小姐姐2 的视频</button>
+        <!-- 新增: 在选择来源界面也增加一个图片按钮 -->
+        <button class="source-btn" id="imageBtn">查看 小姐姐图片</button>
     </div>
 
     <div class="video-container" id="videoContainer">
@@ -144,8 +222,23 @@
             <button class="ctrl-btn" id="nextBtn">换一个视频</button>
             <button class="ctrl-btn" id="switchSourceBtn">切换来源</button>
             <button class="ctrl-btn" id="muteBtn">取消静音</button>
+            <!-- 新增: 在视频播放时也增加一个查看图片的按钮 -->
+            <button class="ctrl-btn" id="openImageBtn">小姐姐图片</button>
         </div>
         <div id="loading">正在加载...</div>
+    </div>
+
+    <!-- 新增: 图片浏览界面 -->
+    <div class="image-mode" id="imageMode">
+        <h1>请选择你喜欢的风格</h1>
+        <div class="btn-group">
+            <button class="btn btn-white" onclick="loadImage('bs')">白丝</button>
+            <button class="btn btn-black" onclick="loadImage('hs')">黑丝</button>
+        </div>
+        <div id="image-container">
+            <div class="loading">点击上方按钮加载图片...</div>
+        </div>
+        <button class="ctrl-btn" id="backToVideoBtn" style="margin-top: 20px; background: rgba(100, 100, 100, 0.8);">返回视频</button>
     </div>
 
     <script>
@@ -159,6 +252,12 @@
         const switchSourceBtn = document.getElementById('switchSourceBtn');
         const muteBtn = document.getElementById('muteBtn');
         const loading = document.getElementById('loading');
+        
+        // 新增: 获取图片模式相关元素
+        const imageMode = document.getElementById('imageMode');
+        const imageBtn = document.getElementById('imageBtn'); // 来自选择界面的按钮
+        const openImageBtn = document.getElementById('openImageBtn'); // 来自视频界面的按钮
+        const backToVideoBtn = document.getElementById('backToVideoBtn'); // 返回视频按钮
 
         let isLoading = false;
         let isMuted = true;
@@ -183,21 +282,19 @@
 
                 let videoUrl = '';
                 if (currentSource === 'source1') {
-                    // 根据您提供的API响应，随机小姐姐1的视频URL字段是 video_url
                     if (data.code === 200 && data.video_url) {
                         videoUrl = data.video_url;
-                    } else if (data.videoUrl) { // 备用字段（驼峰式）
+                    } else if (data.videoUrl) {
                         videoUrl = data.videoUrl;
-                    } else if (data.url) { // 其他可能字段
+                    } else if (data.url) {
                         videoUrl = data.url;
                     }
                 } else if (currentSource === 'source2') {
-                    // 随机小姐姐2的API响应，视频URL字段是 download_url
                     if (data.code === 200 && data.download_url) {
                         videoUrl = data.download_url;
-                    } else if (data.video_url) { // 备用字段
+                    } else if (data.video_url) {
                         videoUrl = data.video_url;
-                    } else if (data.url) { // 其他可能字段
+                    } else if (data.url) {
                         videoUrl = data.url;
                     }
                 }
@@ -243,6 +340,24 @@
             }
         }
 
+        // 新增: 图片加载函数 (整合自你提供的代码)
+        function loadImage(type) {
+            const container = document.getElementById('image-container');
+            container.innerHTML = '<div class="loading">加载中...</div>';
+            const apiUrl = `https://api.kxzjoker.cn/api/wallhere?type=${type}&t=${new Date().getTime()}`;
+            const img = new Image();
+            img.onload = function() {
+                container.innerHTML = '';
+                container.appendChild(img);
+            };
+            img.onerror = function() {
+                container.innerHTML = '<div class="loading" style="color: red;">加载失败，请重试</div>';
+            };
+            img.src = apiUrl;
+        }
+
+        // --- 事件监听器 ---
+
         startBtn.addEventListener('click', function() {
             startBtn.style.display = 'none';
             sourceSelector.style.display = 'block';
@@ -262,6 +377,12 @@
             loadAndPlayVideo();
         });
 
+        // 新增: 点击“小姐姐图片”按钮 (在选择界面)
+        imageBtn.addEventListener('click', () => {
+            sourceSelector.style.display = 'none';
+            imageMode.style.display = 'flex'; // 显示图片模式
+        });
+
         nextBtn.addEventListener('click', loadAndPlayVideo);
 
         switchSourceBtn.addEventListener('click', () => {
@@ -273,6 +394,18 @@
             isMuted = !isMuted;
             video.muted = isMuted;
             muteBtn.textContent = isMuted ? '取消静音' : '静音';
+        });
+
+        // 新增: 点击“小姐姐图片”按钮 (在视频播放界面)
+        openImageBtn.addEventListener('click', () => {
+            videoContainer.style.display = 'none';
+            imageMode.style.display = 'flex';
+        });
+
+        // 新增: 点击“返回视频”按钮
+        backToVideoBtn.addEventListener('click', () => {
+            imageMode.style.display = 'none';
+            videoContainer.style.display = 'block';
         });
 
         video.addEventListener('ended', loadAndPlayVideo);
