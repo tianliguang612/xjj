@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>随机小姐姐</title>
+    <title>随机小姐姐视频</title>
     <style>
         body {
             background-image: url('https://free-img.400040.xyz/4/2026/02/08/69888de882e23.jpg');
@@ -21,60 +21,6 @@
             overflow: hidden;
         }
 
-        /* --- 修改：视频容器 --- */
-        /* 关键：设置为相对定位，作为内部绝对定位元素的参考点 */
-        .video-container {
-            position: relative;
-            width: 90%;
-            max-width: 600px;
-            margin-top: 20px;
-            display: none; /* 初始隐藏 */
-        }
-
-        /* --- 修改：视频样式 --- */
-        /* 视频保持正常流布局，作为底层 */
-        .video-container video {
-            width: 100%;
-            height: auto;
-            border-radius: 12px;
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-            background: #000;
-            display: block;
-        }
-
-        /* --- 修改：换一个按钮 --- */
-        /* 关键：绝对定位，覆盖在视频上 */
-        #changeBtn {
-            position: absolute;
-            /* 定位在右上角，距离边缘留点空隙 */
-            top: 10px;
-            right: 10px;
-            /* 确保在视频上层 */
-            z-index: 10;
-            
-            /* 样式美化 */
-            background-color: rgba(0, 0, 0, 0.6); /* 半透明背景 */
-            border: none;
-            color: white;
-            padding: 10px 15px;
-            font-size: 14px;
-            cursor: pointer;
-            border-radius: 6px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-            transition: all 0.2s ease;
-            font-weight: bold;
-        }
-
-        #changeBtn:hover {
-            background-color: rgba(0, 0, 0, 0.8);
-            transform: scale(1.05);
-        }
-
-        #changeBtn:active {
-            transform: scale(0.95);
-        }
-
-        /* 开始按钮保持原样 */
         #startBtn {
             background-color: #4CAF50;
             border: none;
@@ -89,83 +35,247 @@
             margin: 5px;
             z-index: 5;
         }
-
         #startBtn:hover {background-color: #45a049}
         #startBtn:active {
             background-color: #3e8e41;
             box-shadow: 0 5px #666;
             transform: translateY(4px);
         }
+
+        .source-selector {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+            backdrop-filter: blur(5px);
+        }
+        .source-selector h3 {
+            color: white;
+            margin-bottom: 15px;
+        }
+        .source-btn {
+            background-color: #FF69B4;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 8px;
+            margin: 0 10px;
+            transition: background 0.2s;
+        }
+        .source-btn:hover {
+            background-color: #FF1493;
+        }
+
+        .video-container {
+            position: relative;
+            width: 90%;
+            max-width: 600px;
+            margin-top: 20px;
+            display: none;
+        }
+        .video-container video {
+            width: 100%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            background: #000;
+            display: block;
+        }
+
+        .btn-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+        .ctrl-btn {
+            padding: 10px 20px;
+            background: rgba(255, 105, 180, 0.8);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+            backdrop-filter: blur(5px);
+        }
+        .ctrl-btn:hover {
+            background: rgba(255, 105, 180, 1);
+        }
+        #switchSourceBtn {
+            background: rgba(30, 144, 255, 0.8);
+        }
+        #switchSourceBtn:hover {
+            background: rgba(30, 144, 255, 1);
+        }
+
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            font-size: 16px;
+            background: rgba(0,0,0,0.5);
+            padding: 10px 20px;
+            border-radius: 10px;
+            display: none;
+        }
     </style>
 </head>
 <body>
-
-    <!-- 界面按钮 -->
     <button id="startBtn">点击开始</button>
 
-    <!-- --- 修改：视频与按钮的包裹容器 --- -->
-    <!-- 这个 div 现在是定位的参考点 -->
+    <div class="source-selector" id="sourceSelector">
+        <h3>请选择视频来源</h3>
+        <button class="source-btn" id="source1Btn">播放 随机小姐姐1 的视频</button>
+        <button class="source-btn" id="source2Btn">播放 随机小姐姐2 的视频</button>
+    </div>
+
     <div class="video-container" id="videoContainer">
-        <video id="videoPlayer" muted></video>
-        <button id="changeBtn">换一个</button>
+        <video id="videoPlayer" muted playsinline></video>
+        <div class="btn-container">
+            <button class="ctrl-btn" id="nextBtn">换一个视频</button>
+            <button class="ctrl-btn" id="switchSourceBtn">切换来源</button>
+            <button class="ctrl-btn" id="muteBtn">取消静音</button>
+        </div>
+        <div id="loading">正在加载...</div>
     </div>
 
     <script>
         const startBtn = document.getElementById('startBtn');
-        const changeBtn = document.getElementById('changeBtn');
+        const sourceSelector = document.getElementById('sourceSelector');
+        const source1Btn = document.getElementById('source1Btn');
+        const source2Btn = document.getElementById('source2Btn');
         const videoContainer = document.getElementById('videoContainer');
         const video = document.getElementById('videoPlayer');
+        const nextBtn = document.getElementById('nextBtn');
+        const switchSourceBtn = document.getElementById('switchSourceBtn');
+        const muteBtn = document.getElementById('muteBtn');
+        const loading = document.getElementById('loading');
 
-        // API 地址
-        const apiUrl = 'https://api.kxzjoker.cn/api/sjmnsp';
+        let isLoading = false;
+        let isMuted = true;
+        let currentSource = null;
 
-        // 核心：获取并播放视频的函数
+        // 两个视频API地址
+        const apiSource1 = 'https://api.kxzjoker.cn/api/sjmnsp'; // 随机小姐姐1
+        const apiSource2 = 'https://api.kxzjoker.cn/api/Beautyvideo?type=json'; // 随机小姐姐2
+
         async function loadAndPlayVideo() {
+            if (isLoading || !currentSource) return;
+            isLoading = true;
+            loading.style.display = 'block';
+
             try {
-                const response = await fetch(apiUrl);
-                if (!response.ok) throw new Error('网络响应错误');
+                const targetApi = currentSource === 'source1' ? apiSource1 : apiSource2;
+                console.log(`正在请求API: ${targetApi}`);
+                const response = await fetch(targetApi);
+                if (!response.ok) throw new Error(`网络响应错误 (状态码: ${response.status})`);
                 const data = await response.json();
+                console.log('API响应数据:', data);
 
-                if (data.code === 200 && data.video_url) {
-                    // 1. 重置视频
+                let videoUrl = '';
+                if (currentSource === 'source1') {
+                    // 根据您提供的API响应，随机小姐姐1的视频URL字段是 video_url
+                    if (data.code === 200 && data.video_url) {
+                        videoUrl = data.video_url;
+                    } else if (data.videoUrl) { // 备用字段（驼峰式）
+                        videoUrl = data.videoUrl;
+                    } else if (data.url) { // 其他可能字段
+                        videoUrl = data.url;
+                    }
+                } else if (currentSource === 'source2') {
+                    // 随机小姐姐2的API响应，视频URL字段是 download_url
+                    if (data.code === 200 && data.download_url) {
+                        videoUrl = data.download_url;
+                    } else if (data.video_url) { // 备用字段
+                        videoUrl = data.video_url;
+                    } else if (data.url) { // 其他可能字段
+                        videoUrl = data.url;
+                    }
+                }
+
+                console.log(`提取的视频URL: ${videoUrl}`);
+                if (videoUrl) {
                     video.pause();
-                    video.src = "";
-                    video.load();
+                    video.src = videoUrl;
+                    video.muted = isMuted;
 
-                    // 2. 加载新源
-                    video.src = data.video_url;
+                    video.onloadeddata = () => {
+                        console.log('视频数据已加载，开始播放');
+                        video.play().catch(e => {
+                            console.log("自动播放被阻止:", e);
+                            isLoading = false;
+                            loading.style.display = 'none';
+                        });
+                    };
 
-                    // 3. 尝试播放
-                    await video.play();
+                    video.oncanplaythrough = () => {
+                        console.log('视频可以流畅播放');
+                        isLoading = false;
+                        loading.style.display = 'none';
+                    };
 
-                    // 4. 播放成功后，移除静音
-                    video.muted = false;
+                    video.onerror = () => {
+                        console.error("视频加载失败，URL:", videoUrl);
+                        console.error("视频错误详情:", video.error);
+                        isLoading = false;
+                        loading.style.display = 'none';
+                        alert('视频加载失败，请重试或切换来源');
+                    };
 
                 } else {
-                    alert('视频链接获取失败，请稍后再试。');
+                    console.warn('无法从API响应中获取视频地址，响应数据:', data);
+                    throw new Error('无法从API响应中获取视频地址。请检查API返回的数据格式。');
                 }
             } catch (error) {
                 console.error('请求出错:', error);
-                alert('网络请求失败，请检查网络或稍后再试。');
+                isLoading = false;
+                loading.style.display = 'none';
+                alert('获取视频失败: ' + error.message);
             }
         }
 
-        // 点击“开始”按钮
         startBtn.addEventListener('click', function() {
             startBtn.style.display = 'none';
-            videoContainer.style.display = 'block'; // 显示容器
+            sourceSelector.style.display = 'block';
+        });
+
+        source1Btn.addEventListener('click', () => {
+            currentSource = 'source1';
+            sourceSelector.style.display = 'none';
+            videoContainer.style.display = 'block';
             loadAndPlayVideo();
         });
 
-        // 点击“换一个”按钮
-        changeBtn.addEventListener('click', function() {
+        source2Btn.addEventListener('click', () => {
+            currentSource = 'source2';
+            sourceSelector.style.display = 'none';
+            videoContainer.style.display = 'block';
             loadAndPlayVideo();
         });
 
-        // 视频结束自动播放下一个
-        video.addEventListener('ended', function() {
-            loadAndPlayVideo();
+        nextBtn.addEventListener('click', loadAndPlayVideo);
+
+        switchSourceBtn.addEventListener('click', () => {
+            videoContainer.style.display = 'none';
+            sourceSelector.style.display = 'block';
         });
+
+        muteBtn.addEventListener('click', () => {
+            isMuted = !isMuted;
+            video.muted = isMuted;
+            muteBtn.textContent = isMuted ? '取消静音' : '静音';
+        });
+
+        video.addEventListener('ended', loadAndPlayVideo);
     </script>
 </body>
 </html>
