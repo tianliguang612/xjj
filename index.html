@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>随机小姐姐视频</title>
+    <title>随机小姐姐视频 & 淘宝买家秀</title>
     <style>
         body {
             background-image: url('https://free-img.400040.xyz/4/2026/02/08/69888de882e23.jpg');
@@ -132,7 +132,7 @@
             display: none;
         }
 
-        /* 新增: 图片模式的样式 */
+        /* 图片模式的样式 */
         .image-mode {
             display: none; /* 默认隐藏 */
             position: fixed;
@@ -203,6 +203,101 @@
             font-size: 16px;
             color: #ccc;
         }
+
+        /* 淘宝买家秀模式的样式 */
+        .taobao-mode {
+            display: none; /* 默认隐藏 */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #f0f2f5;
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 20px;
+        }
+        .taobao-container {
+            width: 100%;
+            max-width: 500px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .taobao-image-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            background: #f8f9fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .taobao-image-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        .taobao-loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #666;
+        }
+        .taobao-spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        .taobao-error {
+            color: #e74c3c;
+            text-align: center;
+            padding: 20px;
+        }
+        .taobao-button-container {
+            padding: 20px;
+            text-align: center;
+        }
+        .taobao-next-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .taobao-next-btn:hover {
+            background: #2980b9;
+        }
+        .taobao-next-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+        .taobao-back-btn {
+            margin-top: 20px;
+            background: rgba(100, 100, 100, 0.8);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .taobao-back-btn:hover {
+            background: rgba(70, 70, 70, 0.8);
+        }
     </style>
 </head>
 <body>
@@ -212,7 +307,9 @@
         <h3>请选择视频来源</h3>
         <button class="source-btn" id="source1Btn">播放 随机小姐姐1 的视频</button>
         <button class="source-btn" id="source2Btn">播放 随机小姐姐2 的视频</button>
-        <!-- 新增: 在选择来源界面也增加一个图片按钮 -->
+        <!-- 淘宝买家秀按钮 -->
+        <button class="source-btn" id="taobaoBtn">淘宝买家秀</button>
+        <!-- 在选择来源界面也增加一个图片按钮 -->
         <button class="source-btn" id="imageBtn">查看 小姐姐图片</button>
     </div>
 
@@ -221,14 +318,14 @@
         <div class="btn-container">
             <button class="ctrl-btn" id="nextBtn">换一个视频</button>
             <button class="ctrl-btn" id="switchSourceBtn">切换来源</button>
-            <button class="ctrl-btn" id="muteBtn">取消静音</button>
-            <!-- 新增: 在视频播放时也增加一个查看图片的按钮 -->
+            <button class="ctrl-btn" id="muteBtn">静音</button>
+            <!-- 在视频播放时也增加一个查看图片的按钮 -->
             <button class="ctrl-btn" id="openImageBtn">小姐姐图片</button>
         </div>
         <div id="loading">正在加载...</div>
     </div>
 
-    <!-- 新增: 图片浏览界面 -->
+    <!-- 图片浏览界面 -->
     <div class="image-mode" id="imageMode">
         <h1>请选择你喜欢的风格</h1>
         <div class="btn-group">
@@ -241,11 +338,35 @@
         <button class="ctrl-btn" id="backToVideoBtn" style="margin-top: 20px; background: rgba(100, 100, 100, 0.8);">返回视频</button>
     </div>
 
+    <!-- 淘宝买家秀界面 -->
+    <div class="taobao-mode" id="taobaoMode">
+        <div class="taobao-container">
+            <div class="taobao-image-container">
+                <div id="taobaoLoading" class="taobao-loading" style="display: block;">
+                    <div class="taobao-spinner"></div>
+                    <p>正在加载图片...</p>
+                </div>
+                
+                <div id="taobaoError" class="taobao-error" style="display: none;">
+                    加载失败，请重试
+                </div>
+                
+                <img id="taobaoImage" alt="淘宝买家秀" style="display: none;">
+            </div>
+            
+            <div class="taobao-button-container">
+                <button id="taobaoNextBtn" class="taobao-next-btn">下一张</button>
+                <button id="taobaoBackBtn" class="taobao-back-btn">返回主界面</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const startBtn = document.getElementById('startBtn');
         const sourceSelector = document.getElementById('sourceSelector');
         const source1Btn = document.getElementById('source1Btn');
         const source2Btn = document.getElementById('source2Btn');
+        const taobaoBtn = document.getElementById('taobaoBtn');
         const videoContainer = document.getElementById('videoContainer');
         const video = document.getElementById('videoPlayer');
         const nextBtn = document.getElementById('nextBtn');
@@ -253,19 +374,27 @@
         const muteBtn = document.getElementById('muteBtn');
         const loading = document.getElementById('loading');
         
-        // 新增: 获取图片模式相关元素
         const imageMode = document.getElementById('imageMode');
-        const imageBtn = document.getElementById('imageBtn'); // 来自选择界面的按钮
-        const openImageBtn = document.getElementById('openImageBtn'); // 来自视频界面的按钮
-        const backToVideoBtn = document.getElementById('backToVideoBtn'); // 返回视频按钮
+        const imageBtn = document.getElementById('imageBtn');
+        const openImageBtn = document.getElementById('openImageBtn');
+        const backToVideoBtn = document.getElementById('backToVideoBtn');
+        
+        const taobaoMode = document.getElementById('taobaoMode');
+        const taobaoImageElement = document.getElementById('taobaoImage');
+        const taobaoLoadingElement = document.getElementById('taobaoLoading');
+        const taobaoErrorElement = document.getElementById('taobaoError');
+        const taobaoNextBtn = document.getElementById('taobaoNextBtn');
+        const taobaoBackBtn = document.getElementById('taobaoBackBtn');
 
         let isLoading = false;
-        let isMuted = true;
+        let isMuted = false; // 修改1: 默认不静音
         let currentSource = null;
+        let isTaobaoLoading = false;
+        let isVideoPlaying = false; // 新增: 记录视频播放状态
 
-        // 两个视频API地址
-        const apiSource1 = 'https://api.kxzjoker.cn/api/sjmnsp'; // 随机小姐姐1
-        const apiSource2 = 'https://api.kxzjoker.cn/api/Beautyvideo?type=json'; // 随机小姐姐2
+        const apiSource1 = 'https://api.kxzjoker.cn/api/sjmnsp';
+        const apiSource2 = 'https://api.kxzjoker.cn/api/Beautyvideo?type=json';
+        const taobaoApiUrl = 'https://yunapi.cn/api/sjtbmjx';
 
         async function loadAndPlayVideo() {
             if (isLoading || !currentSource) return;
@@ -303,12 +432,15 @@
                 if (videoUrl) {
                     video.pause();
                     video.src = videoUrl;
-                    video.muted = isMuted;
+                    video.muted = isMuted; // 使用当前的静音状态
 
                     video.onloadeddata = () => {
                         console.log('视频数据已加载，开始播放');
-                        video.play().catch(e => {
+                        video.play().then(() => {
+                            isVideoPlaying = true; // 记录播放状态
+                        }).catch(e => {
                             console.log("自动播放被阻止:", e);
+                            isVideoPlaying = false;
                             isLoading = false;
                             loading.style.display = 'none';
                         });
@@ -325,6 +457,7 @@
                         console.error("视频错误详情:", video.error);
                         isLoading = false;
                         loading.style.display = 'none';
+                        isVideoPlaying = false;
                         alert('视频加载失败，请重试或切换来源');
                     };
 
@@ -336,11 +469,12 @@
                 console.error('请求出错:', error);
                 isLoading = false;
                 loading.style.display = 'none';
+                isVideoPlaying = false;
                 alert('获取视频失败: ' + error.message);
             }
         }
 
-        // 新增: 图片加载函数 (整合自你提供的代码)
+        // 图片加载函数
         function loadImage(type) {
             const container = document.getElementById('image-container');
             container.innerHTML = '<div class="loading">加载中...</div>';
@@ -354,6 +488,54 @@
                 container.innerHTML = '<div class="loading" style="color: red;">加载失败，请重试</div>';
             };
             img.src = apiUrl;
+        }
+
+        // 淘宝买家秀图片加载函数
+        function loadTaobaoImage() {
+            if (isTaobaoLoading) return;
+            
+            isTaobaoLoading = true;
+            taobaoNextBtn.disabled = true;
+            taobaoNextBtn.textContent = '加载中...';
+            taobaoLoadingElement.style.display = 'block';
+            taobaoErrorElement.style.display = 'none';
+            taobaoImageElement.style.display = 'none';
+            
+            try {
+                const img = new Image();
+                const timestamp = Date.now();
+                const imageUrl = `${taobaoApiUrl}?t=${timestamp}`;
+                
+                img.onload = () => {
+                    taobaoImageElement.src = imageUrl;
+                    taobaoImageElement.style.display = 'block';
+                    taobaoErrorElement.style.display = 'none';
+                    
+                    isTaobaoLoading = false;
+                    taobaoNextBtn.disabled = false;
+                    taobaoNextBtn.textContent = '下一张';
+                    taobaoLoadingElement.style.display = 'none';
+                };
+                
+                img.onerror = () => {
+                    taobaoErrorElement.style.display = 'block';
+                    taobaoLoadingElement.style.display = 'none';
+                    
+                    isTaobaoLoading = false;
+                    taobaoNextBtn.disabled = false;
+                    taobaoNextBtn.textContent = '下一张';
+                };
+                
+                img.src = imageUrl;
+                
+            } catch (error) {
+                taobaoErrorElement.style.display = 'block';
+                taobaoLoadingElement.style.display = 'none';
+                
+                isTaobaoLoading = false;
+                taobaoNextBtn.disabled = false;
+                taobaoNextBtn.textContent = '下一张';
+            }
         }
 
         // --- 事件监听器 ---
@@ -377,10 +559,42 @@
             loadAndPlayVideo();
         });
 
-        // 新增: 点击“小姐姐图片”按钮 (在选择界面)
+        taobaoBtn.addEventListener('click', () => {
+            sourceSelector.style.display = 'none';
+            taobaoMode.style.display = 'flex';
+            loadTaobaoImage();
+            
+            // 暂停视频
+            if (video.src && video.src !== '' && !video.paused) {
+                video.pause();
+                isVideoPlaying = false;
+            }
+        });
+
+        // 修改2: 进入图片模式时暂停视频
         imageBtn.addEventListener('click', () => {
             sourceSelector.style.display = 'none';
-            imageMode.style.display = 'flex'; // 显示图片模式
+            imageMode.style.display = 'flex';
+            
+            // 暂停当前正在播放的视频
+            if (video.src && video.src !== '' && !video.paused) {
+                video.pause();
+                isVideoPlaying = false;
+                console.log("进入图片模式，视频已暂停");
+            }
+        });
+
+        // 修改3: 在视频播放界面点击图片按钮时暂停视频
+        openImageBtn.addEventListener('click', () => {
+            videoContainer.style.display = 'none';
+            imageMode.style.display = 'flex';
+            
+            // 暂停当前正在播放的视频
+            if (video.src && video.src !== '' && !video.paused) {
+                video.pause();
+                isVideoPlaying = true; // 记录视频之前是在播放状态
+                console.log("切换到图片模式，视频已暂停");
+            }
         });
 
         nextBtn.addEventListener('click', loadAndPlayVideo);
@@ -388,6 +602,12 @@
         switchSourceBtn.addEventListener('click', () => {
             videoContainer.style.display = 'none';
             sourceSelector.style.display = 'block';
+            
+            // 切换来源时暂停当前视频
+            if (video.src && video.src !== '' && !video.paused) {
+                video.pause();
+                isVideoPlaying = false;
+            }
         });
 
         muteBtn.addEventListener('click', () => {
@@ -396,19 +616,61 @@
             muteBtn.textContent = isMuted ? '取消静音' : '静音';
         });
 
-        // 新增: 点击“小姐姐图片”按钮 (在视频播放界面)
-        openImageBtn.addEventListener('click', () => {
-            videoContainer.style.display = 'none';
-            imageMode.style.display = 'flex';
-        });
-
-        // 新增: 点击“返回视频”按钮
+        // 修改4: 返回视频时尝试恢复播放
         backToVideoBtn.addEventListener('click', () => {
             imageMode.style.display = 'none';
             videoContainer.style.display = 'block';
+            
+            // 尝试恢复视频播放
+            if (video.src && video.src !== '') {
+                video.play().then(() => {
+                    console.log("返回视频模式，视频已恢复播放");
+                    isVideoPlaying = true;
+                }).catch(e => {
+                    console.log("浏览器阻止自动播放，需要用户交互:", e);
+                    isVideoPlaying = false;
+                    // 显示提示让用户手动播放
+                    alert("视频播放被浏览器阻止，请点击视频或播放按钮");
+                });
+            } else {
+                console.log("没有视频URL，返回选择界面");
+                sourceSelector.style.display = 'block';
+                videoContainer.style.display = 'none';
+            }
         });
 
-        video.addEventListener('ended', loadAndPlayVideo);
+        // 淘宝买家秀下一张按钮
+        taobaoNextBtn.addEventListener('click', loadTaobaoImage);
+
+        // 淘宝买家秀返回主界面
+        taobaoBackBtn.addEventListener('click', () => {
+            taobaoMode.style.display = 'none';
+            sourceSelector.style.display = 'block';
+            
+            // 尝试恢复视频播放
+            if (video.src && video.src !== '' && isVideoPlaying) {
+                video.play().then(() => {
+                    console.log("从淘宝模式返回，视频已恢复播放");
+                }).catch(e => {
+                    console.log("恢复播放失败:", e);
+                });
+            }
+        });
+
+        // 监听视频结束事件
+        video.addEventListener('ended', () => {
+            isVideoPlaying = false;
+            loadAndPlayVideo();
+        });
+
+        // 监听视频播放/暂停状态变化
+        video.addEventListener('play', () => {
+            isVideoPlaying = true;
+        });
+
+        video.addEventListener('pause', () => {
+            isVideoPlaying = false;
+        });
     </script>
 </body>
 </html>
