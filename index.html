@@ -227,8 +227,7 @@
             background: rgba(70, 70, 70, 0.8);
         }
 
-        /* 修改点: 样式与结构开始 - 将小姐姐图片模式改为文档2的样式 */
-        /* 新的丝袜小姐姐图集界面样式 */
+        /* 新的丝袜小姐姐图集界面样式 - 从2.html复制并调整 */
         .sister-image-mode {
             display: none; /* 默认隐藏 */
             position: fixed;
@@ -246,21 +245,22 @@
             font-family: "Microsoft YaHei", sans-serif;
         }
         .sister-image-mode h1 {
-            font-size: 22px; /* 从28px调小，同文档2 */
-            margin-top: 20px; /* 从40px减少，同文档2 */
-            margin-bottom: 20px; /* 从30px减少，同文档2 */
+            font-size: 22px; /* 从2.html调整 */
+            margin-top: 20px; /* 从2.html调整 */
+            margin-bottom: 20px; /* 从2.html调整 */
             text-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
-        .img-btn-container {
+        /* 从2.html复制的样式 */
+        .btn-container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 15px; /* 从20px减少，同文档2 */
-            margin-bottom: 20px; /* 从30px减少，同文档2 */
+            gap: 15px; /* 从2.html调整 */
+            margin-bottom: 20px; /* 从2.html调整 */
         }
-        .img-btn {
-            padding: 12px 40px; /* 从15px 50px调小，同文档2 */
-            font-size: 18px; /* 从20px调小，同文档2 */
+        .btn-next {
+            padding: 12px 40px; /* 从2.html调整 */
+            font-size: 18px; /* 从2.html调整 */
             border: none;
             border-radius: 50px;
             cursor: pointer;
@@ -270,33 +270,33 @@
             background: linear-gradient(to right, #12c2e9, #c471ed, #f64f59);
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
-        .img-btn:hover {
+        .btn-next:hover {
             transform: translateY(-3px);
             box-shadow: 0 6px 20px rgba(0,0,0,0.3);
         }
-        .img-btn:active {
+        .btn-next:active {
             transform: translateY(-1px);
         }
-        .img-btn:disabled {
+        .btn-next:disabled {
             opacity: 0.6;
             cursor: not-allowed;
             transform: none;
         }
-        #img-image-container {
-            width: 90%; /* 同文档2 */
-            max-width: 600px; /* 同文档2 */
-            height: 400px; /* 同文档2 */
+        #image-container {
+            width: 90%;
+            max-width: 600px;
+            height: 400px;
             background: rgba(255, 255, 255, 0.1);
             border-radius: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            margin-top: 5px; /* 从10px减少，同文档2 */
-            margin-bottom: 20px; /* 添加底部间距，同文档2 */
+            margin-top: 5px; /* 从2.html调整 */
+            margin-bottom: 20px; /* 从2.html调整 */
             border: 2px dashed rgba(255, 255, 255, 0.3);
         }
-        #img-image-container img {
+        #image-container img {
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
@@ -308,42 +308,18 @@
             from { opacity: 0; }
             to { opacity: 1; }
         }
-        .img-loading, .img-error {
+        .loading, .error {
             font-size: 16px;
             padding: 20px;
             text-align: center;
         }
-        .img-loading { color: #ccc; }
-        .img-error { color: #ff9d8e; font-weight: bold; }
-        .img-counter {
+        .loading { color: #ccc; }
+        .error { color: #ff9d8e; font-weight: bold; }
+        .counter {
             font-size: 16px;
             color: rgba(255, 255, 255, 0.8);
             margin-top: 10px;
         }
-        /* 修改点: 为返回按钮应用文档2的样式 */
-        #img-back-to-video-btn {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 12px 30px;
-            font-size: 16px;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            color: white;
-            font-weight: bold;
-            background: linear-gradient(to right, #4A00E0, #8E2DE2);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            z-index: 100;
-        }
-        #img-back-to-video-btn:hover {
-            transform: translateX(-50%) translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
-        }
-        /* 修改点: 样式与结构结束 */
-
     </style>
 </head>
 <body>
@@ -394,20 +370,18 @@
         </div>
     </div>
 
-    <!-- 修改点: 新的丝袜小姐姐图集界面 (结构调整为文档2风格) -->
+    <!-- 新的丝袜小姐姐图集界面 - 从2.html复制 -->
     <div class="sister-image-mode" id="sisterImageMode">
         <h1>丝袜小姐姐图集</h1>
-        <div class="img-btn-container">
-            <button class="img-btn" id="img-next-btn">点击下一张</button>
-            <div class="img-counter" id="img-counter">已加载: 0 张</div>
+        <div class="btn-container">
+            <button class="btn-next" id="img-next-btn">点击下一张</button>
+            <div class="counter" id="img-counter">已加载: 0 张</div>
         </div>
-        <div id="img-image-container">
-            <div class="img-loading">点击上方按钮加载图片...</div>
+        <div id="image-container">
+            <div class="loading">点击上方按钮加载图片...</div>
         </div>
-        <!-- 返回按钮的样式已在CSS中修改为同文档2的样式，这里保留其HTML元素 -->
-        <button class="ctrl-btn" id="img-back-to-video-btn">返回视频</button>
+        <button class="ctrl-btn" id="img-back-to-video-btn" style="margin-top: 20px; background: rgba(100, 100, 100, 0.8);">返回视频</button>
     </div>
-    <!-- 修改点结束 -->
 
     <script>
         const startBtn = document.getElementById('startBtn');
@@ -428,7 +402,7 @@
         const imgBackToVideoBtn = document.getElementById('img-back-to-video-btn');
         const imgNextBtn = document.getElementById('img-next-btn');
         const imgCounter = document.getElementById('img-counter');
-        const imgContainer = document.getElementById('img-image-container');
+        const imageContainer = document.getElementById('image-container');
         
         const taobaoMode = document.getElementById('taobaoMode');
         const taobaoImageElement = document.getElementById('taobaoImage');
@@ -447,6 +421,11 @@
         const CORS_PROXY = 'https://corsproxy.io/?';
         let imgLoadCount = 0;
 
+        // --- 关键修改：已经将随机小姐姐2的接口更换为 https://api.52vmy.cn/api/video/tianmei ---
+        const apiSource1 = 'https://api.lolimi.cn/API/xjj/xjj';
+        const apiSource2 = 'https://api.52vmy.cn/api/video/tianmei'; // 已更换为新接口
+        const taobaoApiUrl = 'https://yunapi.cn/api/sjtbmjx';
+
         async function loadAndPlayVideo() {
             if (isLoading || !currentSource) return;
             isLoading = true;
@@ -457,9 +436,12 @@
                 console.log(`正在请求视频源: ${targetApi} (当前来源: ${currentSource})`);
                 let videoUrl = '';
 
+                // --- 为不同来源采用不同处理逻辑 ---
                 if (currentSource === 'source1') {
-                    videoUrl = targetApi + '?t=' + new Date().getTime();
+                    // 对于apiSource1，直接作为视频地址
+                    videoUrl = targetApi + '?t=' + new Date().getTime(); // 添加时间戳防止缓存
                 } else {
+                    // 对于apiSource2新接口，请求JSON数据
                     console.log('开始请求新接口:', targetApi);
                     const response = await fetch(targetApi);
                     
@@ -476,11 +458,13 @@
                     const data = await response.json();
                     console.log('新接口返回的数据:', data);
                     
+                    // 根据您之前提供的截图，解析格式: {"code":200,"msg":"成功","data":{"video":"视频地址"}}
                     if (data.code === 200 && data.data && data.data.video) {
                         videoUrl = data.data.video;
                         console.log('成功提取视频地址:', videoUrl);
                     } else {
                         console.error('接口返回格式不符合预期:', data);
+                        // 尝试其他可能的格式
                         if (data.video) videoUrl = data.video;
                         else if (data.url) videoUrl = data.url;
                         else if (data.video_url) videoUrl = data.video_url;
@@ -498,14 +482,17 @@
                     throw new Error('未能获取到有效的视频地址');
                 }
 
+                // 设置视频源并播放
                 video.pause();
                 video.src = videoUrl;
                 video.muted = isMuted;
 
+                // 清除旧的错误监听器
                 video.onerror = null;
                 video.onloadeddata = null;
                 video.oncanplaythrough = null;
 
+                // 设置新的监听器
                 const loadTimeout = setTimeout(() => {
                     if (isLoading) {
                         console.warn('视频加载超时');
@@ -513,7 +500,7 @@
                         loading.style.display = 'none';
                         alert('视频加载超时，请重试');
                     }
-                }, 10000);
+                }, 10000); // 10秒超时
 
                 video.onloadeddata = () => {
                     clearTimeout(loadTimeout);
@@ -526,6 +513,7 @@
                         console.log("自动播放被阻止:", e);
                         isLoading = false;
                         loading.style.display = 'none';
+                        // 提示用户点击视频播放
                         alert('视频已加载，请点击视频播放按钮');
                     });
                 };
@@ -547,6 +535,7 @@
                     loading.style.display = 'none';
                     isVideoPlaying = false;
                     
+                    // 提供更具体的错误信息
                     let errorMsg = '视频加载失败';
                     if (video.error) {
                         switch(video.error.code) {
@@ -569,15 +558,13 @@
             }
         }
 
-        // 修改点: 将小姐姐图片的加载函数改为文档2的逻辑
-        // 丝袜小姐姐图集图片加载函数 (来自文档2的核心逻辑)
+        // 丝袜小姐姐图集图片加载函数 (完全从2.html复制)
         async function loadRandomImage() {
-            const container = document.getElementById('img-image-container');
-            container.innerHTML = '<div class="img-loading">客官别急...</div>';
+            const container = document.getElementById('image-container');
+            container.innerHTML = '<div class="loading">加载中...</div>';
             imgNextBtn.disabled = true;
-            imgNextBtn.textContent = '客官别急...';
+            imgNextBtn.textContent = '加载中...';
 
-            // 构造随机参数以确保每次获取不同的图片
             const types = ['white', 'black'];
             const randomType = types[Math.floor(Math.random() * types.length)];
             const apiUrl = `https://api.lolimi.cn/API/meizi/api?type=${randomType}&_t=${Date.now()}`;
@@ -614,7 +601,7 @@
                             imgNextBtn.textContent = '点击下一张';
                         };
                         imgDirect.onerror = function() {
-                            container.innerHTML = '<div class="img-error">图片加载失败，请重试</div>';
+                            container.innerHTML = '<div class="error">图片加载失败，请重试</div>';
                             imgNextBtn.disabled = false;
                             imgNextBtn.textContent = '点击下一张';
                         };
@@ -626,12 +613,11 @@
                 }
             } catch (error) {
                 console.error('图片加载出错:', error);
-                container.innerHTML = '<div class="img-error">加载失败，请检查网络后重试</div>';
+                container.innerHTML = '<div class="error">加载失败，请检查网络后重试</div>';
                 imgNextBtn.disabled = false;
                 imgNextBtn.textContent = '点击下一张';
             }
         }
-        // 修改点结束
 
         // 淘宝买家秀图片加载函数
         function loadTaobaoImage() {
@@ -743,7 +729,6 @@
             muteBtn.textContent = isMuted ? '取消静音' : '静音';
         });
 
-        // 修改点: 为下一张图片按钮绑定修改后的新函数
         imgNextBtn.addEventListener('click', loadRandomImage);
 
         imgBackToVideoBtn.addEventListener('click', () => {
@@ -794,8 +779,17 @@
             isVideoPlaying = false;
         });
 
-        // 修改点: 移除了文档1图片模式的键盘事件监听，因为它与文档2的逻辑不完全一致，且可能冲突
-        // 您可以根据需要决定是否添加类似文档2的键盘支持
+        // 可选：在图片模式界面添加键盘支持（按空格键或右箭头键切换图片）
+        document.addEventListener('keydown', (event) => {
+            if (sisterImageMode.style.display === 'flex') { // 仅在图片模式界面生效
+                if (event.code === 'Space' || event.code === 'ArrowRight') {
+                    if (!imgNextBtn.disabled) {
+                        event.preventDefault();
+                        loadRandomImage();
+                    }
+                }
+            }
+        });
     </script>
 </body>
 </html>
