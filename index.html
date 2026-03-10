@@ -387,13 +387,14 @@
         const taobaoBackBtn = document.getElementById('taobaoBackBtn');
 
         let isLoading = false;
-        let isMuted = false; // 修改1: 默认不静音
+        let isMuted = false;
         let currentSource = null;
         let isTaobaoLoading = false;
-        let isVideoPlaying = false; // 新增: 记录视频播放状态
+        let isVideoPlaying = false;
 
-        const apiSource1 = 'https://api.kxzjoker.cn/api/sjmnsp';
-        const apiSource2 = 'https://api.kxzjoker.cn/api/Beautyvideo?type=json';
+        // --- 关键修改：替换接口地址并适配视频流 ---
+        const apiSource1 = 'https://api.lolimi.cn/API/xjj/xjj'; // 已替换为新接口，此接口直接返回视频流
+        const apiSource2 = 'https://api.kxzjoker.cn/api/Beautyvideo?type=json'; // 随机小姐姐2 (保持不变，返回JSON)
         const taobaoApiUrl = 'https://yunapi.cn/api/sjtbmjx';
 
         async function loadAndPlayVideo() {
@@ -403,41 +404,46 @@
 
             try {
                 const targetApi = currentSource === 'source1' ? apiSource1 : apiSource2;
-                console.log(`正在请求API: ${targetApi}`);
-                const response = await fetch(targetApi);
-                if (!response.ok) throw new Error(`网络响应错误 (状态码: ${response.status})`);
-                const data = await response.json();
-                console.log('API响应数据:', data);
-
+                console.log(`正在请求视频源: ${targetApi}`);
                 let videoUrl = '';
+
+                // --- 核心修改：为不同来源采用不同处理逻辑 ---
                 if (currentSource === 'source1') {
-                    if (data.code === 200 && data.video_url) {
-                        videoUrl = data.video_url;
-                    } else if (data.videoUrl) {
-                        videoUrl = data.videoUrl;
-                    } else if (data.url) {
-                        videoUrl = data.url;
-                    }
-                } else if (currentSource === 'source2') {
+                    // 对于新接口 apiSource1，将其直接作为视频地址，因为该接口返回视频流
+                    videoUrl = targetApi;
+                } else {
+                    // 对于旧接口 apiSource2，保留原有的JSON解析逻辑
+                    const response = await fetch(targetApi);
+                    if (!response.ok) throw new Error(`网络响应错误 (状态码: ${response.status})`);
+                    const data = await response.json();
+                    console.log('API响应数据:', data);
+
                     if (data.code === 200 && data.download_url) {
                         videoUrl = data.download_url;
                     } else if (data.video_url) {
                         videoUrl = data.video_url;
                     } else if (data.url) {
                         videoUrl = data.url;
+                    } else {
+                        throw new Error('无法从API响应中获取视频地址。');
                     }
                 }
 
-                console.log(`提取的视频URL: ${videoUrl}`);
+                console.log(`设置视频源为: ${videoUrl}`);
                 if (videoUrl) {
                     video.pause();
-                    video.src = videoUrl;
-                    video.muted = isMuted; // 使用当前的静音状态
+                    // 关键：为新接口（source1）添加时间戳参数以防止浏览器缓存导致不更新视频
+                    if (currentSource === 'source1') {
+                        video.src = videoUrl + '?t=' + new Date().getTime();
+                    } else {
+                        video.src = videoUrl;
+                    }
+                    video.muted = isMuted;
 
                     video.onloadeddata = () => {
                         console.log('视频数据已加载，开始播放');
                         video.play().then(() => {
-                            isVideoPlaying = true; // 记录播放状态
+                            isVideoPlaying = true;
                         }).catch(e => {
                             console.log("自动播放被阻止:", e);
                             isVideoPlaying = false;
@@ -462,15 +468,14 @@
                     };
 
                 } else {
-                    console.warn('无法从API响应中获取视频地址，响应数据:', data);
-                    throw new Error('无法从API响应中获取视频地址。请检查API返回的数据格式。');
+                    throw new Error('未能获取有效的视频地址。');
                 }
             } catch (error) {
-                console.error('请求出错:', error);
+                console.error('播放过程出错:', error);
                 isLoading = false;
                 loading.style.display = 'none';
                 isVideoPlaying = false;
-                alert('获取视频失败: ' + error.message);
+                alert('播放失败: ' + error.message);
             }
         }
 
@@ -564,19 +569,16 @@
             taobaoMode.style.display = 'flex';
             loadTaobaoImage();
             
-            // 暂停视频
             if (video.src && video.src !== '' && !video.paused) {
                 video.pause();
                 isVideoPlaying = false;
             }
         });
 
-        // 修改2: 进入图片模式时暂停视频
         imageBtn.addEventListener('click', () => {
             sourceSelector.style.display = 'none';
             imageMode.style.display = 'flex';
             
-            // 暂停当前正在播放的视频
             if (video.src && video.src !== '' && !video.paused) {
                 video.pause();
                 isVideoPlaying = false;
@@ -584,15 +586,13 @@
             }
         });
 
-        // 修改3: 在视频播放界面点击图片按钮时暂停视频
         openImageBtn.addEventListener('click', () => {
             videoContainer.style.display = 'none';
             imageMode.style.display = 'flex';
             
-            // 暂停当前正在播放的视频
             if (video.src && video.src !== '' && !video.paused) {
                 video.pause();
-                isVideoPlaying = true; // 记录视频之前是在播放状态
+                isVideoPlaying = true;
                 console.log("切换到图片模式，视频已暂停");
             }
         });
@@ -603,7 +603,6 @@
             videoContainer.style.display = 'none';
             sourceSelector.style.display = 'block';
             
-            // 切换来源时暂停当前视频
             if (video.src && video.src !== '' && !video.paused) {
                 video.pause();
                 isVideoPlaying = false;
@@ -616,12 +615,10 @@
             muteBtn.textContent = isMuted ? '取消静音' : '静音';
         });
 
-        // 修改4: 返回视频时尝试恢复播放
         backToVideoBtn.addEventListener('click', () => {
             imageMode.style.display = 'none';
             videoContainer.style.display = 'block';
             
-            // 尝试恢复视频播放
             if (video.src && video.src !== '') {
                 video.play().then(() => {
                     console.log("返回视频模式，视频已恢复播放");
@@ -629,7 +626,6 @@
                 }).catch(e => {
                     console.log("浏览器阻止自动播放，需要用户交互:", e);
                     isVideoPlaying = false;
-                    // 显示提示让用户手动播放
                     alert("视频播放被浏览器阻止，请点击视频或播放按钮");
                 });
             } else {
@@ -639,15 +635,12 @@
             }
         });
 
-        // 淘宝买家秀下一张按钮
         taobaoNextBtn.addEventListener('click', loadTaobaoImage);
 
-        // 淘宝买家秀返回主界面
         taobaoBackBtn.addEventListener('click', () => {
             taobaoMode.style.display = 'none';
             sourceSelector.style.display = 'block';
             
-            // 尝试恢复视频播放
             if (video.src && video.src !== '' && isVideoPlaying) {
                 video.play().then(() => {
                     console.log("从淘宝模式返回，视频已恢复播放");
@@ -657,13 +650,11 @@
             }
         });
 
-        // 监听视频结束事件
         video.addEventListener('ended', () => {
             isVideoPlaying = false;
             loadAndPlayVideo();
         });
 
-        // 监听视频播放/暂停状态变化
         video.addEventListener('play', () => {
             isVideoPlaying = true;
         });
