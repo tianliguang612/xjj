@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>随机小姐姐视频</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #000; /* 背景改为黑色，突出视频 */
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden; /* 防止滚动 */
+        }
+
+        .container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            max-width: 500px; /* 平板/桌面端限制最大宽度，保持手机比例 */
+            background: #111;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .video-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* 充满容器 */
+            display: block;
+        }
+
+        /* 加载动画 */
+        .loader {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            z-index: 5;
+        }
+
+        /* 错误提示 */
+        .error-msg {
+            position: absolute;
+            color: #fff;
+            background: rgba(0,0,0,0.6);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: none;
+            z-index: 5;
+            text-align: center;
+        }
+
+        /* 悬浮按钮样式 */
+        .float-btn {
+            position: absolute;
+            bottom: 30px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.6); /* 半透明黑底 */
+            backdrop-filter: blur(5px);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            border-radius: 30px;
+            cursor: pointer;
+            outline: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
+            font-weight: 600;
+            z-index: 20; /* 确保在视频控制器之上 */
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .float-btn:hover {
+            background: rgba(255, 107, 107, 0.8);
+            border-color: transparent;
+            transform: scale(1.05);
+        }
+
+        .float-btn:active {
+            transform: scale(0.95);
+        }
+
+        .float-btn:disabled {
+            background: rgba(50,50,50,0.8);
+            color: #aaa;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* 标题信息悬浮层 (可选，为了不遮挡视频，做得很精简) */
+        .info-overlay {
+            position: absolute;
+            bottom: 80px; /* 在按钮上方 */
+            left: 15px;
+            right: 80px;
+            z-index: 10;
+            color: white;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+            pointer-events: none; /* 让点击穿透 */
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .info-title {
+            font-size: 1rem;
+            font-weight: bold;
+            margin-bottom: 4px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .info-author {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="video-wrapper">
+            <div class="loader" id="loader"></div>
+            <span class="error-msg" id="errorMsg">加载失败<br>请重试</span>
+            
+            <!-- 视频信息悬浮显示 -->
+            <div class="info-overlay" id="infoArea">
+                <div class="info-title" id="videoTitle">加载中...</div>
+                <div class="info-author" id="videoAuthor">作者：未知</div>
+            </div>
+
+            <!-- 视频标签 -->
+            <video id="videoPlayer" playsinline controls loop>
+                您的浏览器不支持 Video 标签。
+            </video>
+
+            <!-- 悬浮按钮 -->
+            <button id="refreshBtn" class="float-btn" onclick="loadVideo()">
+                <span>↻</span> 换一个
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://api.xn--ei1aa.cn/API/ks_new.php';
+        
+        const videoEl = document.getElementById('videoPlayer');
+        const loader = document.getElementById('loader');
+        const errorMsg = document.getElementById('errorMsg');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const titleEl = document.getElementById('videoTitle');
+        const authorEl = document.getElementById('videoAuthor');
+        const infoArea = document.getElementById('infoArea');
+
+        window.onload = loadVideo;
+
+        async function loadVideo() {
+            setLoading(true);
+            infoArea.style.opacity = '0';
+            videoEl.style.opacity = '0';
+            
+            const url = `${API_URL}?t=${new Date().getTime()}`;
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('网络异常');
+
+                const data = await response.json();
+
+                if (data.code === 0 && data.data) {
+                    const { Video, Cover, Title, Author } = data.data;
+
+                    videoEl.src = Video;
+                    if (Cover) videoEl.poster = Cover;
+
+                    titleEl.textContent = Title || "无标题";
+                    authorEl.textContent = `作者：${Author || "未知"}`;
+
+                    videoEl.onloadeddata = () => {
+                        setLoading(false);
+                        videoEl.style.opacity = '1';
+                        infoArea.style.opacity = '1';
+                        videoEl.play().catch(() => {});
+                    };
+
+                    videoEl.onerror = () => handleError("视频无法播放");
+
+                } else {
+                    throw new Error(data.Tips || "数据错误");
+                }
+
+            } catch (error) {
+                console.error(error);
+                handleError("加载失败");
+            }
+        }
+
+        function setLoading(isLoading) {
+            if (isLoading) {
+                loader.style.display = 'block';
+                errorMsg.style.display = 'none';
+                refreshBtn.disabled = true;
+                refreshBtn.innerHTML = '<span>⟳</span> 加载中...';
+            } else {
+                loader.style.display = 'none';
+                refreshBtn.disabled = false;
+                refreshBtn.innerHTML = '<span>↻</span> 换一个';
+            }
+        }
+
+        function handleError(msg) {
+            loader.style.display = 'none';
+            errorMsg.style.display = 'block';
+            refreshBtn.disabled = false;
+            refreshBtn.innerHTML = '<span>↻</span> 重试';
+        }
+    </script>
+</body>
+</html>
