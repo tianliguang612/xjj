@@ -20,7 +20,6 @@
             font-family: 'Microsoft YaHei', sans-serif;
             padding: 20px;
         }
-
         /* 主功能选择界面 - 直接显示（已修改为全透明） */
         .source-selector {
             text-align: center;
@@ -86,7 +85,6 @@
         .btn-icon {
             font-size: 20px;
         }
-
         .video-container {
             position: relative;
             width: 90%;
@@ -102,7 +100,6 @@
             background: #000;
             display: block;
         }
-
         .btn-container {
             position: absolute;
             top: 20px;
@@ -131,7 +128,6 @@
         #switchSourceBtn:hover {
             background: rgba(30, 144, 255, 1);
         }
-
         #loading {
             position: absolute;
             top: 50%;
@@ -144,7 +140,6 @@
             border-radius: 10px;
             display: none;
         }
-
         /* 淘宝买家秀模式的样式 */
         .taobao-mode {
             display: none; /* 默认隐藏 */
@@ -239,7 +234,6 @@
         .taobao-back-btn:hover {
             background: rgba(70, 70, 70, 0.8);
         }
-
         /* 丝袜小姐姐图集界面样式 */
         .sister-image-mode {
             display: none; /* 默认隐藏 */
@@ -375,7 +369,6 @@
             <span class="btn-icon">👠</span> 丝袜小姐姐图集
         </button>
     </div>
-
     <!-- 视频播放容器 -->
     <div class="video-container" id="videoContainer">
         <video id="videoPlayer" muted playsinline></video>
@@ -386,7 +379,6 @@
         </div>
         <div id="loading">正在加载...</div>
     </div>
-
     <!-- 淘宝买家秀界面 -->
     <div class="taobao-mode" id="taobaoMode">
         <div class="taobao-container">
@@ -409,7 +401,6 @@
         </div>
         <button class="back-to-home-btn" id="taobaoBackBtn">返回主页</button>
     </div>
-
     <!-- 丝袜小姐姐图集界面 -->
     <div class="sister-image-mode" id="sisterImageMode">
         <h1>丝袜小姐姐图集</h1>
@@ -422,7 +413,6 @@
         </div>
         <button class="back-to-home-btn" id="img-back-to-video-btn">返回主页</button>
     </div>
-
     <script>
         // DOM元素获取
         const sourceSelector = document.getElementById('sourceSelector');
@@ -450,7 +440,6 @@
         const taobaoErrorElement = document.getElementById('taobaoError');
         const taobaoNextBtn = document.getElementById('taobaoNextBtn');
         const taobaoBackBtn = document.getElementById('taobaoBackBtn');
-
         // 状态变量
         let isLoading = false;
         let isMuted = false;
@@ -461,27 +450,23 @@
         // 图片加载相关变量
         const CORS_PROXY = 'https://corsproxy.io/?';
         let imgLoadCount = 0;
-
         // API接口定义
         const apiSource1 = 'https://api.lolimi.cn/API/xjj/xjj';
-        const apiSource2 = 'https://api.52vmy.cn/api/video/tianmei';
+        const apiSource2 = 'https://api.kuleu.com/api/MP4_xiaojiejie?type=json'; // 已替换为目标接口
         const taobaoApiUrl = 'https://yunapi.cn/api/sjtbmjx';
-
         // 视频加载和播放函数
         async function loadAndPlayVideo() {
             if (isLoading || !currentSource) return;
             isLoading = true;
             loading.style.display = 'block';
-
             try {
                 const targetApi = currentSource === 'source1' ? apiSource1 : apiSource2;
                 console.log(`正在请求视频源: ${targetApi} (当前来源: ${currentSource})`);
                 let videoUrl = '';
-
                 if (currentSource === 'source1') {
                     videoUrl = targetApi + '?t=' + new Date().getTime();
                 } else {
-                    console.log('开始请求新接口:', targetApi);
+                    console.log('开始请求接口:', targetApi);
                     const response = await fetch(targetApi);
                     
                     if (!response.ok) {
@@ -495,38 +480,29 @@
                     }
                     
                     const data = await response.json();
-                    console.log('新接口返回的数据:', data);
+                    console.log('接口返回的数据:', data);
                     
-                    if (data.code === 200 && data.data && data.data.video) {
-                        videoUrl = data.data.video;
-                        console.log('成功提取视频地址:', videoUrl);
+                    // 适配目标接口返回格式：code=200，视频地址在mp4_video字段
+                    if (data.code === 200 && data.mp4_video) {
+                        videoUrl = data.mp4_video;
                     } else {
-                        console.error('接口返回格式不符合预期:', data);
-                        if (data.video) videoUrl = data.video;
-                        else if (data.url) videoUrl = data.url;
-                        else if (data.video_url) videoUrl = data.video_url;
-                        else if (data.download_url) videoUrl = data.download_url;
-                        
-                        if (!videoUrl) {
-                            throw new Error('接口返回格式不符合预期，无法提取视频地址');
-                        }
+                        console.error('无法识别的接口返回格式:', data);
+                        throw new Error('接口返回格式不符合预期，无法提取视频地址');
                     }
+                    
+                    console.log('成功提取视频地址:', videoUrl);
                 }
-
                 console.log(`最终获取的视频地址: ${videoUrl}`);
                 
                 if (!videoUrl) {
                     throw new Error('未能获取到有效的视频地址');
                 }
-
                 video.pause();
                 video.src = videoUrl;
                 video.muted = isMuted;
-
                 video.onerror = null;
                 video.onloadeddata = null;
                 video.oncanplaythrough = null;
-
                 const loadTimeout = setTimeout(() => {
                     if (isLoading) {
                         console.warn('视频加载超时');
@@ -534,8 +510,7 @@
                         loading.style.display = 'none';
                         alert('视频加载超时，请重试');
                     }
-                }, 10000);
-
+                }, 15000);
                 video.onloadeddata = () => {
                     clearTimeout(loadTimeout);
                     console.log('视频数据已加载，开始播放');
@@ -550,14 +525,12 @@
                         alert('视频已加载，请点击视频播放按钮');
                     });
                 };
-
                 video.oncanplaythrough = () => {
                     clearTimeout(loadTimeout);
                     console.log('视频可以流畅播放');
                     isLoading = false;
                     loading.style.display = 'none';
                 };
-
                 video.onerror = (e) => {
                     clearTimeout(loadTimeout);
                     console.error('视频播放错误:', e);
@@ -569,17 +542,18 @@
                     isVideoPlaying = false;
                     
                     let errorMsg = '视频加载失败';
-                    if (video.error) {
+                    // 结合报错信息：若为文件类型不支持，单独提示
+                    if (video.error && video.error.code === 3) {
+                        errorMsg = '视频解码失败，当前不支持该文件类型，请重试';
+                    } else if (video.error) {
                         switch(video.error.code) {
                             case 1: errorMsg = '视频加载被中止'; break;
                             case 2: errorMsg = '网络错误导致视频加载失败'; break;
-                            case 3: errorMsg = '视频解码失败，可能格式不支持'; break;
                             case 4: errorMsg = '视频格式不支持或损坏'; break;
                         }
                     }
                     alert(`${errorMsg}，请重试或切换来源`);
                 };
-
             } catch (error) {
                 console.error('播放过程出错:', error);
                 console.error('错误堆栈:', error.stack);
@@ -589,25 +563,21 @@
                 alert('播放失败: ' + error.message);
             }
         }
-
         // 丝袜小姐姐图集图片加载函数
         async function loadRandomImage() {
             const container = document.getElementById('image-container');
             container.innerHTML = '<div class="loading">客官别急...</div>';
             imgNextBtn.disabled = true;
             imgNextBtn.textContent = '客官别急...';
-
             const types = ['white', 'black'];
             const randomType = types[Math.floor(Math.random() * types.length)];
             const apiUrl = `https://api.lolimi.cn/API/meizi/api?type=${randomType}&_t=${Date.now()}`;
-
             try {
                 const apiResponse = await fetch(apiUrl);
                 if (!apiResponse.ok) throw new Error(`接口请求失败: ${apiResponse.status}`);
                 
                 const jsonData = await apiResponse.json();
                 console.log('图片接口返回数据:', jsonData);
-
                 if (jsonData.code === 1 && jsonData.text) {
                     const realImageUrl = jsonData.text;
                     const proxyImageUrl = CORS_PROXY + encodeURIComponent(realImageUrl);
@@ -650,7 +620,6 @@
                 imgNextBtn.textContent = '点击下一张';
             }
         }
-
         // 淘宝买家秀图片加载函数
         function loadTaobaoImage() {
             if (isTaobaoLoading) return;
@@ -698,7 +667,6 @@
                 taobaoNextBtn.textContent = '下一张';
             }
         }
-
         // --- 事件监听器 ---
         
         // 四个独立功能按钮的点击事件
@@ -708,29 +676,24 @@
             videoContainer.style.display = 'block';
             loadAndPlayVideo();
         });
-
         source2Btn.addEventListener('click', () => {
             currentSource = 'source2';
             sourceSelector.style.display = 'none';
             videoContainer.style.display = 'block';
             loadAndPlayVideo();
         });
-
         taobaoBtn.addEventListener('click', () => {
             sourceSelector.style.display = 'none';
             taobaoMode.style.display = 'flex';
             loadTaobaoImage();
         });
-
         imageBtn.addEventListener('click', () => {
             sourceSelector.style.display = 'none';
             sisterImageMode.style.display = 'flex';
             loadRandomImage(); // 进入时自动加载第一张图片
         });
-
         // 视频界面控制按钮
         nextBtn.addEventListener('click', loadAndPlayVideo);
-
         switchSourceBtn.addEventListener('click', () => {
             videoContainer.style.display = 'none';
             sourceSelector.style.display = 'block';
@@ -740,43 +703,34 @@
                 isVideoPlaying = false;
             }
         });
-
         muteBtn.addEventListener('click', () => {
             isMuted = !isMuted;
             video.muted = isMuted;
             muteBtn.textContent = isMuted ? '取消静音' : '静音';
         });
-
         // 丝袜图集界面控制
         imgNextBtn.addEventListener('click', loadRandomImage);
-
         imgBackToVideoBtn.addEventListener('click', () => {
             sisterImageMode.style.display = 'none';
             sourceSelector.style.display = 'block';
         });
-
         // 淘宝买家秀界面控制
         taobaoNextBtn.addEventListener('click', loadTaobaoImage);
-
         taobaoBackBtn.addEventListener('click', () => {
             taobaoMode.style.display = 'none';
             sourceSelector.style.display = 'block';
         });
-
         // 视频事件监听
         video.addEventListener('ended', () => {
             isVideoPlaying = false;
             loadAndPlayVideo();
         });
-
         video.addEventListener('play', () => {
             isVideoPlaying = true;
         });
-
         video.addEventListener('pause', () => {
             isVideoPlaying = false;
         });
-
         // 键盘快捷键支持
         document.addEventListener('keydown', (event) => {
             // 在丝袜图集界面：空格键或右箭头键切换图片
