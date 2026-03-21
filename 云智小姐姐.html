@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>随机视频播放器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 800px;
+            padding: 20px;
+        }
+        
+        .video-container {
+            position: relative;
+            width: 100%;
+            background: #222;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        video {
+            width: 100%;
+            display: block;
+        }
+        
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 18px;
+        }
+        
+        .controls {
+            text-align: center;
+        }
+        
+        button {
+            background: #ff4081;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background: #f50057;
+        }
+        
+        .info {
+            color: #888;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="video-container">
+            <!-- 直接将API URL设置为视频源 -->
+            <video id="videoPlayer" controls autoplay>
+                <source src="https://yunzhiapi.cn/API/jxhssp.php?token=cZSYhqct8Ttg" type="video/mp4">
+                您的浏览器不支持视频播放
+            </video>
+            <div id="loading" class="loading" style="display: none;">加载中...</div>
+        </div>
+        
+        <div class="controls">
+            <button onclick="changeVideo()">换一个视频</button>
+            <div class="info">视频播放结束会自动播放下一个</div>
+        </div>
+    </div>
+
+    <script>
+        const videoPlayer = document.getElementById('videoPlayer');
+        const loading = document.getElementById('loading');
+        
+        // API URL
+        const API_URL = 'https://yunzhiapi.cn/API/jxhssp.php?token=cZSYhqct8Ttg';
+        
+        // 视频播放结束监听
+        videoPlayer.addEventListener('ended', function() {
+            changeVideo();
+        });
+        
+        // 视频错误监听
+        videoPlayer.addEventListener('error', function() {
+            console.error('视频播放错误');
+            setTimeout(changeVideo, 2000);
+        });
+        
+        // 换一个视频
+        function changeVideo() {
+            // 在URL后添加时间戳，防止浏览器缓存
+            const timestamp = new Date().getTime();
+            const newVideoUrl = API_URL + '&t=' + timestamp;
+            
+            // 显示加载中
+            loading.style.display = 'block';
+            
+            // 创建一个临时的video元素来预加载
+            const tempVideo = document.createElement('video');
+            tempVideo.preload = 'auto';
+            
+            // 当临时视频可以播放时，切换主视频源
+            tempVideo.oncanplay = function() {
+                videoPlayer.src = newVideoUrl;
+                videoPlayer.load();
+                loading.style.display = 'none';
+                videoPlayer.play().catch(e => {
+                    console.log('自动播放被阻止，需要用户交互');
+                });
+            };
+            
+            // 临时视频加载错误处理
+            tempVideo.onerror = function() {
+                loading.textContent = '加载失败，正在重试...';
+                setTimeout(changeVideo, 2000);
+            };
+            
+            // 开始加载临时视频
+            tempVideo.src = newVideoUrl;
+        }
+        
+        // 页面可见性变化处理
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                videoPlayer.pause();
+            } else if (!videoPlayer.paused) {
+                videoPlayer.play();
+            }
+        });
+        
+        // 键盘快捷键
+        document.addEventListener('keydown', function(e) {
+            if (e.code === 'Space' || e.code === 'Enter') {
+                e.preventDefault();
+                changeVideo();
+            }
+        });
+    </script>
+</body>
+</html>
